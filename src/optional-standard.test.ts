@@ -1,0 +1,5 @@
+import {it,expect} from 'vitest';
+import {newProject,createRevision,parseProject} from './model';
+import {exportBundle,importBundle,projectCsv,importCsv,readCsv,applyCsv} from './bundle';
+it('vlastné označenie, materiál a forma zostanú v zálohe, CSV aj revízii',()=>{const p=newProject();p.standardLabel='KONTROLNÝ ŠTANDARD\n(B)';p.material='PA66-GF30';p.mold='F-125';expect(importBundle(exportBundle(p))).toEqual(p);const csv=importCsv(projectCsv(p));expect([csv.standardLabel,csv.material,csv.mold]).toEqual([p.standardLabel,p.material,p.mold]);const next=createRevision(p,'R07');expect(next.standardLabel).toBe(p.standardLabel);expect(next.material).toBe(p.material);expect(next.mold).toBe(p.mold);expect(()=>parseProject(JSON.stringify({...p,mold:42}))).toThrow('voliteľné')});
+it('prázdne označenie zostane prázdne a starší CSV s CT je stále podporovaný',()=>{const p=newProject();p.standardLabel='';p.ct=12;expect(importBundle(exportBundle(p)).standardLabel).toBe('');const old=readCsv(projectCsv(p)).map(row=>row.slice(0,26).map(v=>'"'+v.replaceAll('"','""')+'"').join(';')).join('\r\n');expect(applyCsv(p,old)).toEqual(p)});

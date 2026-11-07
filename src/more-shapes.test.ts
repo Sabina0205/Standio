@@ -1,0 +1,6 @@
+import {it,expect} from 'vitest';
+import {newProject,uid,createRevision,parseProject} from './model';
+import {exportBundle,importBundle} from './bundle';
+import {isLinearMark} from './annotation-tools';
+import {moveMark,scaleMark} from './annotation-geometry';
+it('nové čiary, obojstranná šípka a trojuholník sa upravia a zachovajú v ZIP a revízii',()=>{const p=newProject();p.steps[0].photos=[{id:uid(),name:'test.png',src:'data:image/png;base64,AQIDBA==',purpose:'position',status:'',marks:['line','dashedLine','doubleArrow','triangle'].map(type=>({id:uid(),type,x:10,y:20,ex:70,ey:60,color:'#00ff00',n:1,rotation:30,strokeWidth:1.4}))}];expect(importBundle(exportBundle(p))).toEqual(p);expect(createRevision(p,'R07').steps[0].photos).toEqual(p.steps[0].photos);for(const mark of p.steps[0].photos[0].marks){expect(moveMark(mark,5,5).x).toBe(15);expect(scaleMark(mark,.5).x).toBe(25)}expect(isLinearMark('line')).toBe(true);expect(isLinearMark('doubleArrow')).toBe(true);expect(isLinearMark('triangle')).toBe(false);expect(()=>parseProject(JSON.stringify({...p,steps:[{...p.steps[0],photos:[{...p.steps[0].photos[0],marks:[{...p.steps[0].photos[0].marks[0],type:'neplatny'}]}]}]}))).toThrow('anotácia')});

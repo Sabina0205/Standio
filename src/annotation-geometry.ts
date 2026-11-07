@@ -1,0 +1,5 @@
+import type {Mark} from './model';
+export const clamp=(v:number,min=0,max=100)=>Math.max(min,Math.min(max,v));
+export function moveMark(m:Mark,dx:number,dy:number):Mark{dx=clamp(dx,-Math.min(m.x,m.ex),100-Math.max(m.x,m.ex));dy=clamp(dy,-Math.min(m.y,m.ey),100-Math.max(m.y,m.ey));return {...m,x:m.x+dx,ex:m.ex+dx,y:m.y+dy,ey:m.ey+dy}}
+export function scaleMark(m:Mark,factor:number):Mark{if(m.type==='number')return {...m,size:clamp((m.size||6.8)*factor,2,30)};const cx=(m.x+m.ex)/2,cy=(m.y+m.ey)/2,w=Math.abs(m.ex-m.x),h=Math.abs(m.ey-m.y);const max=Math.min(w?2*Math.min(cx,100-cx)/w:Infinity,h?2*Math.min(cy,100-cy)/h:Infinity);factor=Math.max(.01,Math.min(factor,max));return {...m,...(m.type==='text'?{fontSize:clamp((m.fontSize||3)*factor,1,10)}:{}),x:cx+(m.x-cx)*factor,ex:cx+(m.ex-cx)*factor,y:cy+(m.y-cy)*factor,ey:cy+(m.ey-cy)*factor}}
+export function rotated(x:number,y:number,cx:number,cy:number,angle:number){const a=angle*Math.PI/180,dx=x-cx,dy=y-cy;return{x:cx+dx*Math.cos(a)-dy*Math.sin(a),y:cy+dx*Math.sin(a)+dy*Math.cos(a)}}
